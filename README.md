@@ -18,7 +18,7 @@ pip install pandas
 ## Windows
 
 python -m venv venv
-venv/Scripts/activate
+venv\Scripts\activate
 
 pip install requests
 pip install html5lib
@@ -35,5 +35,5 @@ python3 main.py
 
 ## Windows
 
-venv/Scripts/activate
+venv\Scripts\activate
 python main.py
