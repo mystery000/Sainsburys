@@ -93,31 +93,31 @@ def get_product_details(proxy: Dict, links: List[str]):
         except Exception as e:
             logging.info(f'Error: {str(e)}')
         
-def main(log_to_file: bool = False):
+def run_product_scraper(log_to_file: bool = False):
+    if log_to_file:
+        logging.basicConfig(
+            format="[%(asctime)s] %(message)s",
+            level=logging.INFO,
+            handlers=[
+                logging.handlers.RotatingFileHandler(
+                    "product_scraper.log",
+                    maxBytes=1024 * 1024 * 1024,
+                    backupCount=10),
+            ]
+        )
+    else:
+        logging.basicConfig(
+            format="[%(asctime)s] %(message)s",
+            level=logging.INFO,
+            handlers=[logging.StreamHandler(sys.stdout)]
+        )
+
     try:
-        logging.info("Starting...")
+        logging.info("Starting Product Scraper...")
 
         csv_file_name = "products.csv"
         if os.path.exists(csv_file_name):
             os.remove(csv_file_name)
-
-        if log_to_file:
-            logging.basicConfig(
-                format="[%(asctime)s] %(message)s",
-                level=logging.INFO,
-                handlers=[
-                    logging.handlers.RotatingFileHandler(
-                        "scrape_product_details_log.txt",
-                        maxBytes=1024 * 1024,
-                        backupCount=10),
-                ]
-            )
-        else:
-            logging.basicConfig(
-                format="[%(asctime)s] %(message)s",
-                level=logging.INFO,
-                handlers=[logging.StreamHandler(sys.stdout)]
-            )
 
         product_page_links = get_product_page_links()
 
@@ -143,4 +143,4 @@ def main(log_to_file: bool = False):
         logging.info("Finished!")
 
 if __name__ == '__main__':
-    main()
+    run_product_scraper()

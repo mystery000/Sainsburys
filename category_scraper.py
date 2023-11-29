@@ -96,32 +96,33 @@ class CategoryScraper():
                 for product in category_products:
                     writer.writerow({'Link': product})
 
-def main(log_to_file: bool = False):
+def run_category_scraper(log_to_file: bool = False):
     csv_file_name = "product_detail_links.csv"
     if os.path.exists(csv_file_name):
         os.remove(csv_file_name)
 
     queue = mp.Queue(maxsize=100)
 
+    if log_to_file:
+        logging.basicConfig(
+            format="[%(asctime)s] %(message)s",
+            level=logging.INFO,
+            handlers=[
+                logging.handlers.RotatingFileHandler(
+                    "category_scraper.log",
+                    maxBytes=1024 * 1024 * 1024,
+                    backupCount=10),
+            ]
+        )
+    else:
+        logging.basicConfig(
+            format="[%(asctime)s] %(message)s",
+            level=logging.INFO,
+            handlers=[logging.StreamHandler(sys.stdout)]
+        )
+
     try:
-        logging.info("Starting...")
-        if log_to_file:
-            logging.basicConfig(
-                format="[%(asctime)s] %(message)s",
-                level=logging.INFO,
-                handlers=[
-                    logging.handlers.RotatingFileHandler(
-                        "scrape_product_links_log.txt",
-                        maxBytes=1024 * 1024,
-                        backupCount=10),
-                ]
-            )
-        else:
-            logging.basicConfig(
-                format="[%(asctime)s] %(message)s",
-                level=logging.INFO,
-                handlers=[logging.StreamHandler(sys.stdout)]
-            )
+        logging.info("Starting Category Scraper...")
 
         categories = get_categories()
 
@@ -151,4 +152,4 @@ def main(log_to_file: bool = False):
     logging.info("Finished!")
 
 if (__name__ == '__main__'):
-    main()
+    run_category_scraper()
