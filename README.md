@@ -2,40 +2,26 @@
 
 This is a trusted web scraper for extracting products from Sainburys.
 
-# How to setup
+# Ubuntu
 
-## Ubuntu
+## How to setup
 
-python3 -m venv venv
-source venv/bin/activate
+- python3 -m venv venv
 
-pip install requests
-pip install html5lib
-pip install beautifulsoup4
-pip install selenium
-pip install pandas
+- source venv/bin/activate
 
-## Windows
+- pip install requests html5lib beautifulsoup4 selenium pandas python-dotenv
 
-python -m venv venv
-venv\Scripts\activate
+## How to set the starting time
 
-pip install requests
-pip install html5lib
-pip install beautifulsoup4
-pip install selenium
-pip install pandas
+Please change the time as 24H format in <b style="color: green">watcher.txt</b>
 
-# How to run
+## How to run
 
-## Ubuntu
+- If you run this script in background, please use this command.
 
-source venv/bin/activate
-nohup python3 main.py &
+  nohup python3 main.py &
 
-https://hinty.io/rivashchenko/run-python-script-in-background/#:~:text=If%20you%20want%20to%20run,prepare%20our%20script%20for%20this.&text=Then%20I%20recommend%20adding%20a,it%20is%20a%20python%20script.
+- To stop this script
 
-## Windows
-
-venv\Scripts\activate
-python main.py
+  pkill -f main.py
