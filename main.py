@@ -1,11 +1,10 @@
 import sys
 import logging
 import asyncio
+import logging.handlers
 from datetime import datetime
-
 from category_scraper import run_category_scraper
 from product_scraper import run_product_scraper
-
 
 class Watcher():
     def __init__(self):
@@ -57,7 +56,6 @@ def main(log_to_file: bool = False):
         )
 
     logging.info("Starting Sainsburys scraper...")
-
     
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -69,11 +67,11 @@ def main(log_to_file: bool = False):
     except Exception as e:
         logging.warning(f"Exception: {str(e)}")
     finally:
-        logging.info("Finished!")
+        logging.info("Sainsburys Scraper: Finished!")
         
     loop.close()
     asyncio.set_event_loop(None)
 
 if (__name__ == '__main__'):
-    main(True)
+    main()
     

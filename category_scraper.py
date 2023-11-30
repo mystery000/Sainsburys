@@ -1,10 +1,10 @@
 import os
 import sys
 import csv
+import math
 import json
 import logging
 import requests
-import pandas as pd
 import logging.handlers
 from typing import List
 import multiprocessing as mp
@@ -13,7 +13,6 @@ from selenium.webdriver import Remote, ChromeOptions
 from urllib.parse import urlparse, parse_qs, urlunparse
 from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
 
-BASE_URL = "https://www.sainsburys.co.uk/shop"
 AUTH = 'brd-customer-hl_6c86c9b0-zone-scraping_browser:ynhgmc04x4i5'
 SBR_WEBDRIVER = f'https://{AUTH}@brd.superproxy.io:9515'
 
@@ -21,7 +20,7 @@ def get_categories() -> List[str]:
     url = "https://www.sainsburys.co.uk/groceries-api/gol-services/product/categories/tree"
     response = requests.get(url)
     content = json.loads(response.content)
-    categories = (f"{BASE_URL}/{category['s']}/seeall?fromMegaNav=1" for category in content["category_hierarchy"]["c"])    
+    categories = (f"https://www.sainsburys.co.uk/shop/{category['s']}/seeall?fromMegaNav=1" for category in content["category_hierarchy"]["c"])    
     return list(categories)
 
 class CategoryScraper():
@@ -124,17 +123,15 @@ def run_category_scraper(log_to_file: bool = False):
     try:
         logging.info("Starting Category Scraper...")
 
+        process_count = 3
         categories = get_categories()
+        unit = math.remainder(len(categories) / process_count)
 
         try:
             logging.info(f'Connecting to Scraping Browser: {SBR_WEBDRIVER} ...')
             sbr_connection = ChromiumRemoteConnection(SBR_WEBDRIVER, 'goog', 'chrome')
             logging.info('Connected!')
-            processes = [
-                mp.Process(target=CategoryScraper(queue, sbr_connection, categories[:6]).run), 
-                mp.Process(target=CategoryScraper(queue, sbr_connection, categories[6:12]).run),
-                mp.Process(target=CategoryScraper(queue, sbr_connection, categories[12:]).run),
-                ]
+            processes = [mp.Process(target=CategoryScraper(queue, sbr_connection, categories[unit * i : unit * (i + 1)]).run) for i in range(process_count)]
             for process in processes: process.start()
             for process in processes: process.join()
 
@@ -149,7 +146,7 @@ def run_category_scraper(log_to_file: bool = False):
     finally:
         for process in processes: process.terminate()
 
-    logging.info("Finished!")
+    logging.info("Category Scraper: Finished!")
 
 if (__name__ == '__main__'):
     run_category_scraper()

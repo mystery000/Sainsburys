@@ -31,7 +31,9 @@ pip install pandas
 ## Ubuntu
 
 source venv/bin/activate
-python3 main.py
+nohup python3 main.py &
+
+https://hinty.io/rivashchenko/run-python-script-in-background/#:~:text=If%20you%20want%20to%20run,prepare%20our%20script%20for%20this.&text=Then%20I%20recommend%20adding%20a,it%20is%20a%20python%20script.
 
 ## Windows
 

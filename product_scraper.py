@@ -1,6 +1,7 @@
 import os
 import csv
 import sys
+import math
 import json
 import pandas
 import logging
@@ -56,8 +57,9 @@ def get_product_details(proxy: Dict, links: List[str]):
 
                 product = content['products'][0]
                 title = product['name'] if 'name' in product else None
-                summary = product['description'][0] if 'description' in product else None
-                description = ('\n').join(product['description']) if 'description' in product else None
+                raw_description = product['description'] if 'description' in product else []
+                summary = raw_description[0] if len(raw_description) else ''
+                description = ('\n').join(raw_description)
                 unit_price = product['unit_price']['price'] if 'unit_price' in product else None
                 nectar_price = product['nectar_price']['retail_price'] if 'nectar_price' in product else None
                 image_url = product['image'] if 'image' in product else None
@@ -119,28 +121,42 @@ def run_product_scraper(log_to_file: bool = False):
         if os.path.exists(csv_file_name):
             os.remove(csv_file_name)
 
+        process_count = 5
         product_page_links = get_product_page_links()
+        unit = math.remainder(len(product_page_links) / process_count)
+
+        proxy_ip_addressses = [
+            "95.217.141.220",
+            "35.178.166.150",
+            "13.42.103.29",
+            "52.56.123.52",
+        ]
+
+        proxy_config = {
+            'username': 'arthlo',
+            'password': 'sainsburys',
+            'port': '808'
+        }
 
         proxies = [
             {
-                'http': 'http://arthlo:7ujm&UJM@95.217.141.220:808',
-                'https': 'http://arthlo:7ujm&UJM@95.217.141.220:808',
-            }
+                "http": f"http://{proxy_config['username']}:{proxy_config['password']}@{proxy_ip_address}:808",
+                "https": f"http://{proxy_config['username']}:{proxy_config['password']}@{proxy_ip_address}:808",
+            } for proxy_ip_address in proxy_ip_addressses
         ]
-        processes = [
-            mp.Process(target=get_product_details, args=[None, product_page_links[:5]]),
-            mp.Process(target=get_product_details, args=[proxies[0], product_page_links[5:10]]),
-            # mp.Process(target=get_product_details, args=[product_page_links[40000:]])
-            ]
+
+        processes = [mp.Process(target=get_product_details, args=[None, product_page_links[unit * i : unit * (i + 1)]]) if i == 0 else mp.Process(target=get_product_details, args=[proxies[i-1], product_page_links[unit * i : unit * (i + 1)]]) for i in range(process_count)]
+
         for process in processes: process.start()
         for process in processes: process.join()
+
     except KeyboardInterrupt:
         logging.info("Quitting...")
     except Exception as e:
         logging.warning(f"Exception: {str(e)}")
     finally:
         for process in processes: process.terminate()
-        logging.info("Finished!")
+        logging.info("Product Scraper: Finished!")
 
 if __name__ == '__main__':
     run_product_scraper()
