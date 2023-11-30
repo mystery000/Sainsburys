@@ -131,13 +131,13 @@ def run_category_scraper(log_to_file: bool = False):
             logging.info(f'Connecting to Scraping Browser: {SBR_WEBDRIVER} ...')
             sbr_connection = ChromiumRemoteConnection(SBR_WEBDRIVER, 'goog', 'chrome')
             logging.info('Connected!')
-            processes = [mp.Process(target=CategoryScraper(queue, sbr_connection, categories[unit * i : unit * (i + 1)]).run) for i in range(process_count)]
-            for process in processes: process.start()
-            for process in processes: process.join()
-
         except Exception as e:
-            for process in processes: process.terminate()
-            logging.error(f"Scraping Browser connection failed due to {str(e)}")
+            logging.error(f"Scraping Browser connection failed")
+            raise e
+        
+        processes = [mp.Process(target=CategoryScraper(queue, sbr_connection, categories[unit * i : unit * (i + 1)]).run) for i in range(process_count)]
+        for process in processes: process.start()
+        for process in processes: process.join()
 
     except KeyboardInterrupt:
         logging.info("Quitting...")
