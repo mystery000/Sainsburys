@@ -101,6 +101,7 @@ def run_category_scraper(log_to_file: bool = False):
         os.remove(csv_file_name)
 
     queue = mp.Queue(maxsize=100)
+    processes: List[mp.Process] = []
 
     if log_to_file:
         logging.basicConfig(
@@ -125,7 +126,7 @@ def run_category_scraper(log_to_file: bool = False):
 
         process_count = 3
         categories = get_categories()
-        unit = math.remainder(len(categories) / process_count)
+        unit = math.floor(len(categories) / process_count)
 
         try:
             logging.info(f'Connecting to Scraping Browser: {SBR_WEBDRIVER} ...')

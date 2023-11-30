@@ -36,6 +36,7 @@ def get_product_details(proxy: Dict, links: List[str]):
                 response = requests.get(get_product_detail_link(link), proxies=proxy)
             else:
                 response = requests.get(get_product_detail_link(link))
+                
             content = json.loads(response.content)
             csv_file_name = "products.csv"
 
@@ -114,6 +115,8 @@ def run_product_scraper(log_to_file: bool = False):
             handlers=[logging.StreamHandler(sys.stdout)]
         )
 
+    processes: List[mp.Process] = []
+
     try:
         logging.info("Starting Product Scraper...")
 
@@ -123,7 +126,7 @@ def run_product_scraper(log_to_file: bool = False):
 
         process_count = 5
         product_page_links = get_product_page_links()
-        unit = math.remainder(len(product_page_links) / process_count)
+        unit = math.floor(len(product_page_links) / process_count)
 
         proxy_ip_addressses = [
             "95.217.141.220",
