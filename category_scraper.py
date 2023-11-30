@@ -9,12 +9,14 @@ import logging.handlers
 from typing import List
 import multiprocessing as mp
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from selenium.webdriver import Remote, ChromeOptions
 from urllib.parse import urlparse, parse_qs, urlunparse
 from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
 
-AUTH = 'brd-customer-hl_6c86c9b0-zone-scraping_browser:ynhgmc04x4i5'
-SBR_WEBDRIVER = f'https://{AUTH}@brd.superproxy.io:9515'
+load_dotenv()
+
+SBR_WEBDRIVER = f'https://{os.getenv("SCRAPING_BROWSER_AUTH")}@brd.superproxy.io:9515'
 
 def get_categories() -> List[str]:
     url = "https://www.sainsburys.co.uk/groceries-api/gol-services/product/categories/tree"

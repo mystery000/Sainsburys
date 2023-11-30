@@ -10,6 +10,9 @@ import logging.handlers
 import multiprocessing as mp
 from datetime import datetime
 from typing import List, Dict
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def get_product_page_links() -> List[str]:
     csv_file_name = 'product_detail_links.csv'
@@ -36,7 +39,7 @@ def get_product_details(proxy: Dict, links: List[str]):
                 response = requests.get(get_product_detail_link(link), proxies=proxy)
             else:
                 response = requests.get(get_product_detail_link(link))
-                
+
             content = json.loads(response.content)
             csv_file_name = "products.csv"
 
@@ -47,6 +50,7 @@ def get_product_details(proxy: Dict, links: List[str]):
                     'description',
                     'unit_price',
                     'nectar_price',
+                    'product_url',
                     'image_url',
                     'size',
                     'tags',
@@ -75,6 +79,7 @@ def get_product_details(proxy: Dict, links: List[str]):
                     'description': description,
                     'unit_price': unit_price,
                     'nectar_price': nectar_price,
+                    'product_url': link,
                     'image_url': image_url,
                     'size': size,
                     'tags': tags,
@@ -136,9 +141,9 @@ def run_product_scraper(log_to_file: bool = False):
         ]
 
         proxy_config = {
-            'username': 'arthlo',
-            'password': 'sainsburys',
-            'port': '808'
+            'username': os.getenv('PROXY_USERNAME'),
+            'password': os.getenv('PROXY_PASSWORD'),
+            'port': os.getenv('PROXY_PORT')
         }
 
         proxies = [
