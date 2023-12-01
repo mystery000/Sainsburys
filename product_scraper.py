@@ -92,6 +92,7 @@ def get_product_details(proxy: Dict, links: List[str]):
                     'description': description,
                     'unit_price': unit_price,
                     'nectar_price': nectar_price,
+                    'product_url': link,
                     'image_url': image_url,
                     'size': size,
                     'tags': tags,
