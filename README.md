@@ -1,4 +1,4 @@
-# Sainsburys
+# Sainsburys Scraper
 
 This is a trusted web scraper for extracting products from Sainburys.
 
@@ -25,3 +25,5 @@ Please change the time as 24H format in <b style="color: green">watcher.txt</b>
 - To stop this script
 
   pkill -f main.py
+
+* CCProxy Installation
