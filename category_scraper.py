@@ -138,7 +138,11 @@ def run_category_scraper(log_to_file: bool = False):
             logging.error(f"Scraping Browser connection failed")
             raise e
         
-        processes = [mp.Process(target=CategoryScraper(queue, sbr_connection, categories[unit * i : unit * (i + 1)]).run) for i in range(process_count)]
+        processes = [
+            mp.Process(target=CategoryScraper(queue, sbr_connection, categories[unit * i : ]).run)
+            if i == process_count - 1
+            else mp.Process(target=CategoryScraper(queue, sbr_connection, categories[unit * i : unit * (i + 1)]).run)
+            for i in range(process_count)]
         for process in processes: process.start()
         for process in processes: process.join()
 
