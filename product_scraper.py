@@ -45,6 +45,7 @@ def get_product_details(proxy: Dict, links: List[str]):
 
             with open(csv_file_name, 'a', newline='') as csv_file:
                 fieldnames = [
+                    'source',
                     'title', 
                     'summary', 
                     'description',
@@ -60,6 +61,7 @@ def get_product_details(proxy: Dict, links: List[str]):
                 if csv_file.tell() == 0:
                     writer.writeheader()
 
+                source = "Sainsburys"
                 product = content['products'][0]
                 title = product['name'] if 'name' in product else None
                 raw_description = product['description'] if 'description' in product else []
@@ -74,6 +76,7 @@ def get_product_details(proxy: Dict, links: List[str]):
                 now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
                 logging.info({
+                    'source': source,
                     'title': title, 
                     'summary': summary,
                     'description': description,
@@ -87,6 +90,7 @@ def get_product_details(proxy: Dict, links: List[str]):
                     })
                 
                 writer.writerow({
+                    'source': source,
                     'title': title, 
                     'summary': summary,
                     'description': description,
