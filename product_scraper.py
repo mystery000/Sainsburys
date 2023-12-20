@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_product_page_links() -> List[str]:
-    csv_file_name = 'product_detail_links.csv'
+    csv_file_name = 'sainsburys_product_links.csv'
     links: List[str] = []
     try:
         if os.path.exists(csv_file_name):

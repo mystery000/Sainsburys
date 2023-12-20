@@ -88,7 +88,7 @@ class CategoryScraper():
     def run(self) -> List[str]:
         for category in self._categories:
             category_products = self.get_category_products(category)
-            csv_file_name = "product_detail_links.csv"
+            csv_file_name = "sainsburys_product_links.csv"
             with open(csv_file_name, 'a', newline='') as csv_file:
                 fieldnames = ['Link']
                 writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -98,7 +98,7 @@ class CategoryScraper():
                     writer.writerow({'Link': product})
 
 def run_category_scraper(log_to_file: bool = False):
-    csv_file_name = "product_detail_links.csv"
+    csv_file_name = "sainsburys_product_links.csv"
     if os.path.exists(csv_file_name):
         os.remove(csv_file_name)
 
