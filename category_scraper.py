@@ -16,8 +16,6 @@ from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnecti
 
 load_dotenv()
 
-SBR_WEBDRIVER = f'https://{os.getenv("SCRAPING_BROWSER_AUTH")}@brd.superproxy.io:9515'
-
 def get_categories() -> List[str]:
     url = "https://www.sainsburys.co.uk/groceries-api/gol-services/product/categories/tree"
     response = requests.get(url)
@@ -131,9 +129,8 @@ def run_category_scraper(log_to_file: bool = False):
         unit = math.floor(len(categories) / process_count)
 
         try:
-            logging.info(f'Connecting to Scraping Browser: {SBR_WEBDRIVER} ...')
+            SBR_WEBDRIVER = f'https://{os.getenv("SELENIUM_SERVER_IP")}:{os.getenv("SELENIUM_SERVER_PORT")}'
             sbr_connection = ChromiumRemoteConnection(SBR_WEBDRIVER, 'goog', 'chrome')
-            logging.info('Connected!')
         except Exception as e:
             logging.error(f"Scraping Browser connection failed")
             raise e
