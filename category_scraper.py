@@ -9,12 +9,9 @@ import logging.handlers
 from typing import List
 import multiprocessing as mp
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 from selenium.webdriver import Remote, ChromeOptions
 from urllib.parse import urlparse, parse_qs, urlunparse
 from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
-
-load_dotenv()
 
 def get_categories() -> List[str]:
     url = "https://www.sainsburys.co.uk/groceries-api/gol-services/product/categories/tree"
@@ -128,18 +125,20 @@ def run_category_scraper(log_to_file: bool = False):
         categories = get_categories()
         unit = math.floor(len(categories) / process_count)
 
-        try:
-            SBR_WEBDRIVER = f'https://{os.getenv("SELENIUM_SERVER_IP")}:{os.getenv("SELENIUM_SERVER_PORT")}'
-            sbr_connection = ChromiumRemoteConnection(SBR_WEBDRIVER, 'goog', 'chrome')
-        except Exception as e:
-            logging.error(f"Scraping Browser connection failed")
-            raise e
-        
+        SELENIUM_GRID_IP_ADDRESSES = [
+            "95.217.141.220:9515",
+            "65.109.54.105:9515",
+            "65.21.132.89:9515",
+        ]
+        sbr_connections = [ChromiumRemoteConnection(f"http://{IP}", "goog", "chrome") for IP in SELENIUM_GRID_IP_ADDRESSES]
+
         processes = [
-            mp.Process(target=CategoryScraper(queue, sbr_connection, categories[unit * i : ]).run)
+            mp.Process(target=CategoryScraper(queue, sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)], categories[unit * i : ]).run)
             if i == process_count - 1
-            else mp.Process(target=CategoryScraper(queue, sbr_connection, categories[unit * i : unit * (i + 1)]).run)
-            for i in range(process_count)]
+            else mp.Process(target=CategoryScraper(queue, sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)], categories[unit * i : unit * (i + 1)]).run)
+            for i in range(process_count)
+        ]
+        
         for process in processes: process.start()
         for process in processes: process.join()
 
