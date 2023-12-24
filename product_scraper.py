@@ -51,6 +51,9 @@ def get_product_details(proxy: Dict, links: List[str]):
                     'description',
                     'unit_price',
                     'nectar_price',
+                    'average_rating',
+                    'review_count',
+                    'categories',
                     'product_url',
                     'image_url',
                     'size',
@@ -72,7 +75,10 @@ def get_product_details(proxy: Dict, links: List[str]):
                 image_url = product['image'] if 'image' in product else None
                 size = product['size'] if 'size' in product else None
                 tags = (',').join([label['text'] for label in product['labels']]) if 'labels' in product else None
-                
+                reviews = product['reviews'] if 'reviews' in product else {"total": 0, "average_rating": 0}
+                average_rating = reviews["average_rating"] if 'average_rating' in reviews else 0
+                review_count = reviews["total"] if 'review_count' in reviews else 0
+                categories = ",".join([category["label"] for category in product["breadcrumbs"]] if 'breadcrumbs' in product else [])
                 now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
                 logging.info({
@@ -82,6 +88,9 @@ def get_product_details(proxy: Dict, links: List[str]):
                     'description': description,
                     'unit_price': unit_price,
                     'nectar_price': nectar_price,
+                    'average_rating': average_rating,
+                    'review_count': review_count,
+                    'categories': categories,
                     'product_url': link,
                     'image_url': image_url,
                     'size': size,
@@ -96,6 +105,9 @@ def get_product_details(proxy: Dict, links: List[str]):
                     'description': description,
                     'unit_price': unit_price,
                     'nectar_price': nectar_price,
+                    'average_rating': average_rating,
+                    'review_count': review_count,
+                    'categories': categories,
                     'product_url': link,
                     'image_url': image_url,
                     'size': size,
