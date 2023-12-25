@@ -4,7 +4,6 @@ import csv
 import math
 import json
 import logging
-import requests
 import logging.handlers
 from typing import List
 import multiprocessing as mp
@@ -68,18 +67,16 @@ class CategoryScraper():
 
                         logging.info(f"Scraping page content[{os.getpid()}]: {current_page_url}")
 
-                        response = requests.get(current_page_url)
-                        current_page = BeautifulSoup(response.content, 'html5lib')
+                        driver.get(current_page_url)
+                        current_page = BeautifulSoup(driver.page_source, 'html5lib')
 
                         if current_page.html.find('div', class_='pagination'):
                             for product in current_page.html.findAll('div', class_='product'):
                                 try:
                                     url = product.find('div', class_='productInfo').a['href']
+                                    if url: _products.append(url)
                                 except TypeError:
-                                    continue
-
-                                if url: 
-                                    _products.append(url)
+                                    pass
 
         except Exception as e:
             logging.info(f'Exception: {str(e)}')
@@ -98,6 +95,7 @@ class CategoryScraper():
                     writer.writeheader()
                 for product in category_products:
                     writer.writerow({'Link': product})
+
 
 def run_category_scraper(log_to_file: bool = False):
     csv_file_name = "sainsburys_product_links.csv"
