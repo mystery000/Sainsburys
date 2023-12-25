@@ -13,12 +13,19 @@ from selenium.webdriver import Remote, ChromeOptions
 from urllib.parse import urlparse, parse_qs, urlunparse
 from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
 
-def get_categories() -> List[str]:
-    url = "https://www.sainsburys.co.uk/groceries-api/gol-services/product/categories/tree"
-    response = requests.get(url)
-    content = json.loads(response.content)
-    categories = (f"https://www.sainsburys.co.uk/shop/{category['s']}/seeall?fromMegaNav=1" for category in content["category_hierarchy"]["c"])    
-    return list(categories)
+def get_categories(sbr_connection: ChromiumRemoteConnection) -> List[str]:
+    taxonomy_url = "https://www.sainsburys.co.uk/groceries-api/gol-services/product/categories/tree"
+    try:
+        with Remote(sbr_connection, options=ChromeOptions()) as driver:
+            driver.get(taxonomy_url)
+            html = driver.page_source
+            page = BeautifulSoup(html, "html5lib")
+            content = json.loads(page.pre.get_text())
+            categories = (f"https://www.sainsburys.co.uk/shop/{category['s']}/seeall?fromMegaNav=1" for category in content["category_hierarchy"]["c"]) 
+            return list(categories)
+    except Exception as e:
+        logging.info(f"Exception: {str(e)}")
+        return []
 
 class CategoryScraper():
     _queue: mp.Queue
@@ -80,7 +87,7 @@ class CategoryScraper():
         finally :
             return _products
     
-    def run(self) -> List[str]:
+    def scrape(self) -> List[str]:
         for category in self._categories:
             category_products = self.get_category_products(category)
             csv_file_name = "sainsburys_product_links.csv"
@@ -121,21 +128,22 @@ def run_category_scraper(log_to_file: bool = False):
     try:
         logging.info("Starting Category Scraper...")
 
-        process_count = 3
-        categories = get_categories()
-        unit = math.floor(len(categories) / process_count)
-
         SELENIUM_GRID_IP_ADDRESSES = [
             "95.217.141.220:9515",
             "65.109.54.105:9515",
             "65.21.132.89:9515",
         ]
+        
         sbr_connections = [ChromiumRemoteConnection(f"http://{IP}", "goog", "chrome") for IP in SELENIUM_GRID_IP_ADDRESSES]
 
+        process_count = 6
+        categories = get_categories(sbr_connections[0])
+        unit = math.floor(len(categories) / process_count)
+        
         processes = [
-            mp.Process(target=CategoryScraper(queue, sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)], categories[unit * i : ]).run)
+            mp.Process(target=CategoryScraper(queue, sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)], categories[unit * i : ]).scrape)
             if i == process_count - 1
-            else mp.Process(target=CategoryScraper(queue, sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)], categories[unit * i : unit * (i + 1)]).run)
+            else mp.Process(target=CategoryScraper(queue, sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)], categories[unit * i : unit * (i + 1)]).scrape)
             for i in range(process_count)
         ]
         
