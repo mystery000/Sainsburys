@@ -12,7 +12,17 @@ This scraper only supports Ubuntu.
 
 - [Git](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-20-04) installed
 
-- [CCProxy](http://www.youngzsoft.net/ccproxy/proxy-server-download.htm) installed on virtual private server with Windows
+- Selenium Grid Server installed on virtual private server with Windows
+
+  - [Java 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html) or higher installed
+
+  - [Microsoft Visual C++ Redistributable x86](https://aka.ms/vs/17/release/vc_redist.x86.exe) and [Microsoft Visual C++ Redistributable x64](https://aka.ms/vs/17/release/vc_redist.x64.exe) installed
+
+  - Download the Selenium Server jar file from the [latest release](https://github.com/SeleniumHQ/selenium/releases/latest)
+
+  - Start the Selenium Grid
+
+    `java -jar selenium-server-<version>.jar standalone --selenium-manager true --port 9515`
 
 ## Get the code
 
