@@ -127,9 +127,9 @@ def run_category_scraper(log_to_file: bool = False):
         logging.info("Starting Category Scraper...")
 
         SELENIUM_GRID_IP_ADDRESSES = [
-            "95.217.141.220:9515",
-            "65.109.54.105:9515",
-            "65.21.132.89:9515",
+            "18.169.27.82:9515",
+            "13.42.66.41:9515",
+            "18.171.169.136:9515"
         ]
         
         sbr_connections = [ChromiumRemoteConnection(f"http://{IP}", "goog", "chrome") for IP in SELENIUM_GRID_IP_ADDRESSES]
