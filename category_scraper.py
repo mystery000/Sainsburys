@@ -8,6 +8,7 @@ import logging.handlers
 from typing import List
 import multiprocessing as mp
 from bs4 import BeautifulSoup
+from config import SELENIUM_SERVERS
 from selenium.webdriver import Remote, ChromeOptions
 from urllib.parse import urlparse, parse_qs, urlunparse
 from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
@@ -125,23 +126,17 @@ def run_category_scraper(log_to_file: bool = False):
 
     try:
         logging.info("Starting Category Scraper...")
-
-        SELENIUM_GRID_IP_ADDRESSES = [
-            "18.169.27.82:9515",
-            "13.42.66.41:9515",
-            "18.171.169.136:9515"
-        ]
         
-        sbr_connections = [ChromiumRemoteConnection(f"http://{IP}", "goog", "chrome") for IP in SELENIUM_GRID_IP_ADDRESSES]
+        sbr_connections = [ChromiumRemoteConnection(SELENIUM_SERVER, "google", "chrome") for SELENIUM_SERVER in SELENIUM_SERVERS]
 
-        process_count = 6
+        process_count = len(SELENIUM_SERVERS) * 2 # Assign two browser sessions per Grid server
         categories = get_categories(sbr_connections[0])
         unit = math.floor(len(categories) / process_count)
         
         processes = [
-            mp.Process(target=CategoryScraper(queue, sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)], categories[unit * i : ]).scrape)
+            mp.Process(target=CategoryScraper(queue, sbr_connections[i % len(SELENIUM_SERVERS)], categories[unit * i : ]).scrape)
             if i == process_count - 1
-            else mp.Process(target=CategoryScraper(queue, sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)], categories[unit * i : unit * (i + 1)]).scrape)
+            else mp.Process(target=CategoryScraper(queue, sbr_connections[i % len(SELENIUM_SERVERS)], categories[unit * i : unit * (i + 1)]).scrape)
             for i in range(process_count)
         ]
         

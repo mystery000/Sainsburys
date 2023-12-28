@@ -12,6 +12,7 @@ from typing import List
 import multiprocessing as mp
 from bs4 import BeautifulSoup
 from datetime import datetime
+from config import SELENIUM_SERVERS
 from selenium.webdriver import Remote, ChromeOptions
 from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
 
@@ -159,22 +160,16 @@ def run_product_scraper(log_to_file: bool = False):
         if os.path.exists(csv_file_name):
             os.remove(csv_file_name)
 
-        process_count = 6
+        process_count = len(SELENIUM_SERVERS) * 2 # Assign two browser sessions per Grid server
         product_page_links = get_product_page_links()
         unit = math.floor(len(product_page_links) / process_count)
 
-        SELENIUM_GRID_IP_ADDRESSES = [
-            "18.169.27.82:9515",
-            "13.42.66.41:9515",
-            "18.171.169.136:9515"
-        ]
-        
-        sbr_connections = [ChromiumRemoteConnection(f"http://{IP}", "goog", "chrome") for IP in SELENIUM_GRID_IP_ADDRESSES]
+        sbr_connections = [ChromiumRemoteConnection(SELENIUM_SERVER, "google", "chrome") for SELENIUM_SERVER in SELENIUM_SERVERS]
 
         processes = [
-            mp.Process(target=ProductScraper(sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)], product_page_links[unit * i : ]).scrape)
+            mp.Process(target=ProductScraper(sbr_connections[i % len(SELENIUM_SERVERS)], product_page_links[unit * i : ]).scrape)
             if i == process_count - 1
-            else mp.Process(target=ProductScraper(sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)], product_page_links[unit * i : unit * (i + 1)]).scrape)
+            else mp.Process(target=ProductScraper(sbr_connections[i % len(SELENIUM_SERVERS)], product_page_links[unit * i : unit * (i + 1)]).scrape)
             for i in range(process_count)
         ]
         
